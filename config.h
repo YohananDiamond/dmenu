@@ -6,15 +6,15 @@ static int topbar = 1;                      /* -b  option; if 0, dmenu appears a
 static const char *fonts[] = {
 	"Cascadia Code:size=12"
 };
-static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
+static const char *prompt = NULL;      /* -p  option; prompt to the left of input field */
 static const char *colors[SchemeLast][2] = {
-	/*     fg         bg       */
+	/* [Key] = { "#fgcolor", "#bgcolor" }, */
 	[SchemeNorm] = { "#d8dee9", "#2e3440" },
 	[SchemeSel] = { "#2e3440", "#81a1c1" },
 	[SchemeOut] = { "#000000", "#00ffff" },
 };
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
-static unsigned int lines      = 5;
+static unsigned int lines = 0;
 
 /*
  * Characters not considered part of a word while deleting words
