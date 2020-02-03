@@ -1,0 +1,4 @@
+*.o
+dmenu
+stest
+dmenu-*.tar.gz
