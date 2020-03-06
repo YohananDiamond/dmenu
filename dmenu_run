@@ -1,2 +1,10 @@
 #!/bin/sh
-dmenu_path | dmenu "$@" | ${SHELL:-"/bin/sh"} &
+
+prog="$(dmenu_path | dmenu "${@}")"
+
+if grep -q '!$' <<<"$prog"; then
+    prog="${prog%?}"
+    exec $TERMINAL -e $prog
+else
+    exec $prog
+fi
