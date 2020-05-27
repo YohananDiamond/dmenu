@@ -936,6 +936,12 @@ main(int argc, char *argv[])
 	XWindowAttributes wa;
 	int i, fast = 0;
 
+	/* case insensitivity */
+	if (conf_case_insensitive) {
+		fstrncmp = strncasecmp;
+		fstrstr = cistrstr;
+	}
+
 	for (i = 1; i < argc; i++)
 		/* these options take no arguments */
 		if (!strcmp(argv[i], "-v")) {      /* prints version information */

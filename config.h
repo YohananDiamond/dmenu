@@ -7,6 +7,9 @@ static int topbar = 1;
 /* -F option; if 0, dmenu doesn't use fuzzy matching */
 static int fuzzy = 1;
 
+/* -i option; if not 0, dmenu forces case insensitivity */
+static int conf_case_insensitive = 1;
+
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
 static unsigned int lines = 20;
 
@@ -33,4 +36,4 @@ static char *colors[SchemeLast][2] = {
 static const char worddelimiters[] = " ";
 
 /* Size of the window border */
-static const unsigned int border_width = 1;
+static const unsigned int border_width = 0;
