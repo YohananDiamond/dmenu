@@ -2,7 +2,7 @@
 /* Default settings; can be overriden by command line. */
 
 /* -b option; if 0, dmenu appears at bottom */
-static int topbar = 1; 
+static int topbar = 1;
 
 /* -F option; if 0, dmenu doesn't use fuzzy matching */
 static int fuzzy = 1;
