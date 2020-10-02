@@ -802,7 +802,7 @@ setup(void)
 					break;
 
 		if (conf_center) {
-			mw = MIN(MAX(max_textw() + promptw, 100), info[i].width);
+			mw = MIN(MAX(max_textw() + promptw, info[i].width / 2.75), info[i].width);
 			x = info[i].x_org + ((info[i].width  - mw) / 2);
 			y = info[i].y_org + ((info[i].height - mh) / 2);
 		} else {
@@ -817,6 +817,7 @@ setup(void)
 		if (!XGetWindowAttributes(dpy, parentwin, &wa))
 			die("could not get embedding window attributes: 0x%lx",
 			    parentwin);
+
 		if (conf_center) {
 			mw = MIN(MAX(max_textw() + promptw, 100), wa.width);
 			x = (wa.width  - mw) / 2;

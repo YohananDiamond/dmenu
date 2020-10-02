@@ -11,16 +11,16 @@ static int fuzzy = 1;
 static int conf_case_insensitive = 1;
 
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
-static unsigned int lines = 0;
+static unsigned int lines = 20;
 
 /* -fn option overrides fonts[0]; default X11 font or font set */
-static const char *fonts[] = { "JetBrains Mono Medium:size=11" };
+static char *fonts[] = { "JetBrains Mono Medium:size=11" };
 
 /* -p option; prompt to the left of input field */
 static const char *prompt = NULL;
 
 /* center */
-static const int conf_center = 0;
+static const int conf_center = 1;
 
 /* default colors */
 static char *colors[SchemeLast][2] = {
