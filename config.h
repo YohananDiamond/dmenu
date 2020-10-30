@@ -14,7 +14,7 @@ static int conf_case_insensitive = 1;
 static unsigned int lines = 20;
 
 /* -fn option overrides fonts[0]; default X11 font or font set */
-static char *fonts[] = { "JetBrains Mono Medium:size=11" };
+static char *fonts[] = { "monospace:size=11" };
 
 /* -p option; prompt to the left of input field */
 static const char *prompt = NULL;

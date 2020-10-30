@@ -26,6 +26,7 @@
                              * MAX(0, MIN((y)+(h),(r).y_org+(r).height) - MAX((y),(r).y_org)))
 #define LENGTH(X)             (sizeof X / sizeof X[0])
 #define TEXTW(X)              (drw_fontset_getwidth(drw, (X)) + lrpad)
+#define STREQ(S1, S2)         (!strcmp((S1), (S2)))
 #define NUMBERSMAXDIGITS      100
 #define NUMBERSBUFSIZE        (NUMBERSMAXDIGITS * 2) + 1
 
@@ -56,6 +57,8 @@ static char *embed;
 static int bh, mw, mh;
 static int inputw = 0, promptw;
 static int lrpad; /* sum of left and right padding */
+static int cli_font_specified = 0;
+static int cli_print_index = 0;
 static size_t cursor;
 static struct item *items = NULL;
 static struct item *matches, *matchend;
@@ -634,12 +637,17 @@ insert:
 		break;
 	case XK_Return:
 	case XK_KP_Enter:
-		puts((sel && !(ev->state & ShiftMask)) ? sel->text : text);
+		if (cli_print_index) {
+			if (sel) printf("%lu\n", itempos(sel));
+		} else {
+			puts((sel && !(ev->state & ShiftMask)) ? sel->text : text);
+		}
 
 		if (!(ev->state & ControlMask)) {
 			cleanup();
 			exit(0);
 		}
+
 		if (sel)
 			sel->out = 1;
 		break;
@@ -881,8 +889,8 @@ setup(void)
 static void
 usage(void)
 {
-	fputs("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
-	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
+	fputs("usage: dmenu [-bfiIv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+	      "             [-w winid]\n", stderr);
 	exit(1);
 }
 
@@ -900,10 +908,12 @@ readxrdb(void)
 
 		xdb = XrmGetStringDatabase(xrm);
 
-		if (XrmGetResource(xdb, "dmenu.font", "*", &type, &xval))
-			fonts[0] = strdup(xval.addr);
-		else
-			fonts[0] = strdup(fonts[0]);
+		if (!cli_font_specified) {
+			if (XrmGetResource(xdb, "dmenu.font", "*", &type, &xval))
+				fonts[0] = strdup(xval.addr);
+			else
+				fonts[0] = strdup(fonts[0]);
+		}
 
 		if (XrmGetResource(xdb, "dmenu.norm.bg", "*", &type, &xval))
 			colors[SchemeNorm][ColBg] = strdup(xval.addr);
@@ -972,42 +982,66 @@ main(int argc, char *argv[])
 	}
 
 	for (i = 1; i < argc; i++)
-		/* these options take no arguments */
-		if (!strcmp(argv[i], "-v")) {      /* prints version information */
-			puts("dmenu-"VERSION);
+		/*
+		 * First of all, options that don't take any argument
+		 */
+		if (STREQ(argv[i], "-v")) {
+			/* print version information */
+			puts("dmenu-" VERSION);
 			exit(0);
-		} else if (!strcmp(argv[i], "-b")) /* appears at the bottom of the screen */
+		} else if (STREQ(argv[i], "-b")) {
+			/* make bar appear at the bottom of the screen */
 			topbar = 0;
-		else if (!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
+		} else if (STREQ(argv[i], "-f")) {
+			/* grab keyboard before reading stdin */
 			fast = 1;
-		else if (!strcmp(argv[i], "-F"))   /* grabs keyboard before reading stdin */
+		} else if (STREQ(argv[i], "-F") || STREQ(argv[i], "--fuzzy=true")) {
+			/* force-enable fuzzy matching */
+			fuzzy = 1;
+		} else if (STREQ(argv[i], "--fuzzy=false")) {
+			/* force-disable fuzzy matching */
 			fuzzy = 0;
-		else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
+		} else if (STREQ(argv[i], "-i")) {
+			/* case-insensitive matching */
 			fstrncmp = strncasecmp;
 			fstrstr = cistrstr;
-		} else if (i + 1 == argc)
+		} else if (STREQ(argv[i], "-I")) {
+			/* print index of item instead of string */
+			cli_print_index = 1;
+		} else if (i + 1 == argc) {
+			/* check if not the last argument because the following options will take one argument */
 			usage();
-		/* these options take one argument */
-		else if (!strcmp(argv[i], "-l"))   /* number of lines in vertical list */
+		}
+
+		/*
+		 * Now, options that take one argument.
+		 */
+		else if (STREQ(argv[i], "-l")) {
+			/* number of lines in vertical list */
+			/* TODO: error handling */
 			lines = atoi(argv[++i]);
-		else if (!strcmp(argv[i], "-m"))
+		} else if (STREQ(argv[i], "-m")) {
+			/* specify monitor (?) */
+			/* TODO: error handling */
 			mon = atoi(argv[++i]);
-		else if (!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
+		} else if (STREQ(argv[i], "-p")) {
+			/* specify prompt */
 			prompt = argv[++i];
-		else if (!strcmp(argv[i], "-fn"))  /* font or font set */
+		} else if (STREQ(argv[i], "-fn") || STREQ(argv[i], "--font")) {
+			/* specify main font */
+			cli_font_specified = 1;
 			fonts[0] = argv[++i];
-		else if (!strcmp(argv[i], "-nb"))  /* normal background color */
-			colors[SchemeNorm][ColBg] = argv[++i];
-		else if (!strcmp(argv[i], "-nf"))  /* normal foreground color */
-			colors[SchemeNorm][ColFg] = argv[++i];
-		else if (!strcmp(argv[i], "-sb"))  /* selected background color */
-			colors[SchemeSel][ColBg] = argv[++i];
-		else if (!strcmp(argv[i], "-sf"))  /* selected foreground color */
-			colors[SchemeSel][ColFg] = argv[++i];
-		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
+		} else if (STREQ(argv[i], "-nb")
+			   || STREQ(argv[i], "-nf")
+			   || STREQ(argv[i], "-sb")
+			   || STREQ(argv[i], "-sf")) {
+			/* deprecated options (meh) */
+		} else if (STREQ(argv[i], "-w")) {
+			/* specify ID of window to embed on, if any */
 			embed = argv[++i];
-		else
+		} else {
 			usage();
+		}
 
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
@@ -1025,7 +1059,9 @@ main(int argc, char *argv[])
 	if (!drw_fontset_create(drw, (const char**) fonts, LENGTH(fonts)))
 		die("no fonts could be loaded.");
 
-	free(fonts[0]);
+	if (!cli_font_specified) {
+		free(fonts[0]);
+	}
 	lrpad = drw->fonts->h;
 
 #ifdef __OpenBSD__
