@@ -39,6 +39,17 @@ struct item {
 	double distance;
 };
 
+size_t itempos(const struct item *node) {
+	size_t i = 0;
+
+	while (node) {
+		node = node->left;
+		i++;
+	}
+
+	return i - 1;
+}
+
 static char numbers[NUMBERSBUFSIZE] = "";
 static char text[BUFSIZ] = "";
 static char *embed;
@@ -624,6 +635,7 @@ insert:
 	case XK_Return:
 	case XK_KP_Enter:
 		puts((sel && !(ev->state & ShiftMask)) ? sel->text : text);
+
 		if (!(ev->state & ControlMask)) {
 			cleanup();
 			exit(0);
