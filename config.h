@@ -5,7 +5,7 @@
 static int topbar = 1;
 
 /* -F option; if 0, dmenu doesn't use fuzzy matching */
-static int fuzzy = 1;
+static int fuzzy = 0;
 
 /* -i option; if not 0, dmenu forces case insensitivity */
 static int conf_case_insensitive = 1;
