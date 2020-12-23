@@ -907,6 +907,7 @@ readxrdb(void)
 		XrmValue xval;
 
 		xdb = XrmGetStringDatabase(xrm);
+		if (!xdb) return;
 
 		if (!cli_font_specified) {
 			if (XrmGetResource(xdb, "dmenu.font", "*", &type, &xval))
