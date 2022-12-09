@@ -496,11 +496,11 @@ keypress(XKeyEvent *ev)
 	if (ev->state & ControlMask) {
 		switch(ksym) {
 		case XK_a: ksym = XK_Home;      break;
-		case XK_b: ksym = XK_Left;      break;
+		case XK_b: ksym = XK_Prior;      break;
 		case XK_c: ksym = XK_Escape;    break;
 		case XK_d: ksym = XK_Delete;    break;
 		case XK_e: ksym = XK_End;       break;
-		case XK_f: ksym = XK_Right;     break;
+		case XK_f: ksym = XK_Next;     break;
 		case XK_g: ksym = XK_Escape;    break;
 		case XK_h: ksym = XK_BackSpace; break;
 		case XK_i: ksym = XK_Tab;       break;
@@ -793,8 +793,8 @@ setup(void)
 	bh = drw->fonts->h + 2;
 	lines = MAX(lines, 0);
 	mh = (lines + 1) * bh;
-	if (conf_center)
-		promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
+	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
+
 #ifdef XINERAMA
 	i = 0;
 	if (parentwin == root && (info = XineramaQueryScreens(dpy, &n))) {
@@ -849,8 +849,6 @@ setup(void)
 			mw = wa.width;
 		}
 	}
-	if (!conf_center)
-		promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
 	inputw = MIN(inputw, mw/3);
 	match();
 
@@ -976,12 +974,6 @@ main(int argc, char *argv[])
 	XWindowAttributes wa;
 	int i, fast = 0;
 
-	/* case insensitivity */
-	if (conf_case_insensitive) {
-		fstrncmp = strncasecmp;
-		fstrstr = cistrstr;
-	}
-
 	for (i = 1; i < argc; i++)
 		/*
 		 * First of all, options that don't take any argument
@@ -1004,8 +996,7 @@ main(int argc, char *argv[])
 			fuzzy = 0;
 		} else if (STREQ(argv[i], "-i")) {
 			/* case-insensitive matching */
-			fstrncmp = strncasecmp;
-			fstrstr = cistrstr;
+			conf_case_insensitive = 1;
 		} else if (STREQ(argv[i], "-I")) {
 			/* print index of item instead of string */
 			cli_print_index = 1;
@@ -1044,25 +1035,38 @@ main(int argc, char *argv[])
 			usage();
 		}
 
+	/* case insensitivity */
+	if (conf_case_insensitive) {
+		fstrncmp = strncasecmp;
+		fstrstr = cistrstr;
+	}
+
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
+
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("cannot open display");
+
 	screen = DefaultScreen(dpy);
 	root = RootWindow(dpy, screen);
+
 	if (!embed || !(parentwin = strtol(embed, NULL, 0)))
 		parentwin = root;
+
 	if (!XGetWindowAttributes(dpy, parentwin, &wa))
 		die("could not get embedding window attributes: 0x%lx",
 		    parentwin);
+
 	drw = drw_create(dpy, screen, root, wa.width, wa.height);
 	readxrdb();
+
 	if (!drw_fontset_create(drw, (const char**) fonts, LENGTH(fonts)))
 		die("no fonts could be loaded.");
 
 	if (!cli_font_specified) {
 		free(fonts[0]);
 	}
+
 	lrpad = drw->fonts->h;
 
 #ifdef __OpenBSD__
