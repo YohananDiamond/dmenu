@@ -2,7 +2,7 @@
 
 pkgname=dmenu-yd
 _pkgname=dmenu
-pkgver=4.9.r592.a7a88e9
+pkgver=4.9.r593.dddeb9b
 pkgrel=1
 epoch=1
 pkgdesc=

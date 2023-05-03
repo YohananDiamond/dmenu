@@ -5,7 +5,6 @@ include config.mk
 
 SRC = drw.c dmenu.c stest.c util.c
 OBJ = $(SRC:.c=.o)
-
 DIST_DIR := dist
 
 all: options dmenu stest
@@ -60,6 +59,7 @@ uninstall:
 		$(DESTDIR)$(MANPREFIX)/man1/stest.1
 
 archinstall:
+	if [ -d $(DIST_DIR) ]; then rm -r $(DIST_DIR); fi
 	PKGDEST=$(DIST_DIR) makepkg -csi
 
 .PHONY: all options clean dist install uninstall archinstall
