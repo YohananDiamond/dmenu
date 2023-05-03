@@ -1,4 +1,9 @@
-*.o
 dmenu
 stest
-dmenu-*.tar.gz
+
+*.o
+
+# build artifacts - makepkg
+src/
+pkg/
+dist/

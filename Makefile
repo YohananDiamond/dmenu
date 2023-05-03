@@ -6,6 +6,8 @@ include config.mk
 SRC = drw.c dmenu.c stest.c util.c
 OBJ = $(SRC:.c=.o)
 
+DIST_DIR := dist
+
 all: options dmenu stest
 
 options:
@@ -32,13 +34,13 @@ clean:
 	rm -f dmenu stest $(OBJ) dmenu-$(VERSION).tar.gz
 
 dist: clean
-	mkdir -p dmenu-$(VERSION)
+	mkdir -p $(DIST_DIR)/dmenu-$(VERSION)
 	cp LICENSE Makefile README arg.h config.def.h config.mk dmenu.1\
 		drw.h util.h stest.1 $(SRC)\
-		dmenu-$(VERSION)
-	tar -cf dmenu-$(VERSION).tar dmenu-$(VERSION)
-	gzip dmenu-$(VERSION).tar
-	rm -rf dmenu-$(VERSION)
+		-t $(DIST_DIR)/dmenu-$(VERSION)
+	tar -cf $(DIST_DIR)/dmenu-$(VERSION).tar $(DIST_DIR)/dmenu-$(VERSION)
+	gzip $(DIST_DIR)/dmenu-$(VERSION).tar
+	rm -rf $(DIST_DIR)/dmenu-$(VERSION)
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
@@ -57,4 +59,7 @@ uninstall:
 		$(DESTDIR)$(MANPREFIX)/man1/dmenu.1\
 		$(DESTDIR)$(MANPREFIX)/man1/stest.1
 
-.PHONY: all options clean dist install uninstall
+archinstall:
+	PKGDEST=$(DIST_DIR) makepkg -csi
+
+.PHONY: all options clean dist install uninstall archinstall
